@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Provider Tax-ID Verify — NPPES</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1b1b1b; --base:#565c65; --base-lt:#71767a;
+    --line:#dfe1e2; --line-2:#a9aeb1; --bg:#f0f0f0; --bg-2:#f9f9f9; --white:#fff;
+    --primary:#005ea2; --primary-dk:#1a4480; --primary-bg:#e8f0f7;
+    --green:#008817; --green-bg:#ecf3ec; --green-bd:#70e17b;
+    --red:#b50909; --red-bg:#f8eff1; --red-bd:#f2938c;
+    --gold:#946f00; --gold-bg:#faf3d1; --gold-bd:#e6c84d;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:'Public Sans',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+       color:var(--ink);background:var(--bg);font-size:15px;line-height:1.45}
+  .mono{font-family:'Roboto Mono',ui-monospace,Menlo,monospace}
+
+  .gov{background:#f0f0f0;border-bottom:1px solid var(--line);font-size:11.5px;color:var(--base)}
+  .gov .in{max-width:1180px;margin:0 auto;padding:6px 24px}
+  .gov b{font-weight:600;color:var(--ink)}
+
+  header{background:var(--primary-dk);color:#fff}
+  .mast{max-width:1180px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;gap:16px}
+  .seal{width:40px;height:40px;border:1.5px solid rgba(255,255,255,.5);border-radius:50%;
+        display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
+  .mast h1{font-size:18px;margin:0;font-weight:700}
+  .mast .sub{font-size:12.5px;opacity:.82;margin-top:1px}
+  .mast .meta{margin-left:auto;text-align:right;font-size:11.5px;opacity:.85;line-height:1.5}
+  .mast .meta b{font-weight:600}
+
+  nav{background:var(--primary)}
+  .navin{max-width:1180px;margin:0 auto;padding:0 24px;display:flex}
+  nav a{color:#fff;text-decoration:none;font-size:13px;font-weight:500;padding:11px 16px;opacity:.85}
+  nav a.on{background:var(--primary-dk);opacity:1;font-weight:600}
+
+  main{max-width:1180px;margin:0 auto;padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+  @media(max-width:880px){main{grid-template-columns:1fr}}
+
+  .card{background:var(--white);border:1px solid var(--line)}
+  .card-h{padding:14px 18px;border-bottom:1px solid var(--line)}
+  .card-h h2{font-size:14px;margin:0;font-weight:700}
+  .card-h .d{font-size:12px;color:var(--base);margin-top:3px}
+  .pad{padding:18px}
+
+  .endpoint{display:flex;align-items:center;gap:9px;background:var(--bg-2);border:1px solid var(--line);
+            border-radius:3px;padding:8px 12px;margin-bottom:18px;font-size:13px}
+  .verb{background:var(--primary);color:#fff;font-weight:700;font-size:11px;letter-spacing:.5px;padding:3px 8px;border-radius:2px}
+
+  label{display:block;font-size:12px;font-weight:600;color:var(--ink);margin:0 0 5px;text-transform:uppercase;letter-spacing:.4px}
+  .hint{font-size:11.5px;color:var(--base);font-weight:400;text-transform:none;letter-spacing:0;margin-left:6px}
+  .inp{width:100%;border:1px solid var(--line-2);border-radius:3px;padding:10px 12px;font:inherit;font-size:14px;margin-bottom:16px}
+  .inp.mono{font-family:'Roboto Mono',monospace;font-size:13.5px}
+  .inp:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-bg)}
+  .inp:disabled{background:var(--bg-2);color:var(--base-lt)}
+
+  .btn{width:100%;background:var(--primary);color:#fff;border:0;border-radius:3px;padding:12px;font:inherit;
+       font-size:14px;font-weight:600;cursor:pointer}
+  .btn:hover{background:var(--primary-dk)}
+  .assure{font-size:11.5px;color:var(--base);margin-top:14px;padding-top:14px;border-top:1px solid var(--line);line-height:1.5}
+  .assure b{color:var(--ink)}
+
+  /* result */
+  .result{min-height:90px}
+  .placeholder{color:var(--base);font-size:13px;padding:24px;text-align:center}
+  .banner{display:flex;align-items:center;gap:13px;padding:16px 18px;border-radius:3px;border:1px solid}
+  .banner .ic{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;flex:none;font-weight:800;color:#fff;font-size:16px}
+  .banner .tx{font-size:16px;font-weight:700}
+  .banner .ds{font-size:12.5px;font-weight:400;margin-top:2px}
+  .ok{background:var(--green-bg);border-color:var(--green-bd);color:#1a4d1f}
+  .ok .ic{background:var(--green)}
+  .no{background:var(--red-bg);border-color:var(--red-bd);color:#5c1414}
+  .no .ic{background:var(--red)}
+  .warn{background:var(--gold-bg);border-color:var(--gold-bd);color:#5a430f}
+  .warn .ic{background:var(--gold)}
+
+  .kv{margin-top:16px;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+  .kv div{display:flex;justify-content:space-between;padding:9px 14px;font-size:13px;border-bottom:1px solid var(--line)}
+  .kv div:last-child{border-bottom:0}
+  .kv div:nth-child(even){background:var(--bg-2)}
+  .kv .k{color:var(--base)}
+  .kv .v{font-weight:600}
+
+  pre{background:#1b2330;color:#d7e2ee;border-radius:3px;padding:14px 16px;overflow:auto;
+      font-family:'Roboto Mono',monospace;font-size:12.5px;line-height:1.6;margin:0}
+  pre .cm{color:#7c8aa0}
+  pre .st{color:#9fd0a0}
+  pre .ky{color:#79b8ff}
+  .full{grid-column:1/-1}
+  .seg{display:flex;border-bottom:1px solid var(--line)}
+  .seg button{flex:1;border:0;background:#fff;padding:10px;font:inherit;font-size:12.5px;font-weight:600;color:var(--base);cursor:pointer;border-right:1px solid var(--line)}
+  .seg button:last-child{border-right:0}
+  .seg button.on{color:var(--primary);box-shadow:inset 0 -3px 0 var(--primary)}
+  .samples{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+  .samp{font-size:11.5px;border:1px solid var(--line-2);background:#fff;border-radius:3px;padding:5px 9px;cursor:pointer;color:var(--primary-dk)}
+  .samp:hover{background:var(--primary-bg)}
+  .stat-pill{font-family:'Roboto Mono',monospace;font-size:11px;background:#fff;border:1px solid var(--line);padding:2px 7px;border-radius:2px;color:var(--base)}
+</style>
+</head>
+<body>
+  <div class="gov"><div class="in"><b>Centers for Medicare &amp; Medicaid Services</b> — NPPES Provider Tax-ID Verification Service · <span>ADR-003 / ADR-004</span></div></div>
+
+  <header>
+    <div class="mast">
+      <div>
+        <h1>Provider Tax-ID Verify</h1>
+        <div class="sub">Confirm a provider's Tax ID against the system of record — without ever disclosing it</div>
+      </div>
+    </div>
+  </header>
+
+  <nav><div class="navin">
+    <a href="#" class="on">Verify</a>
+    <a href="#">API Reference</a>
+  </div></nav>
+
+  <main>
+    <!-- LEFT: request -->
+    <section class="card">
+      <div class="card-h">
+        <h2>Verification Request</h2>
+        <div class="d">Submit an NPI and a candidate Tax ID. The service returns a boolean only.</div>
+      </div>
+      <div class="pad">
+        <div class="endpoint"><span class="verb">POST</span> <span class="mono">/api/verify</span></div>
+
+        <label>x-api-key <span class="hint">issued per consumer · throttled by usage plan</span></label>
+        <input class="inp mono" id="key" value="nr-uat-7f3c8a91b204" />
+
+        <label>NPI <span class="hint">10-digit National Provider Identifier</span></label>
+        <input class="inp mono" id="npi" placeholder="1043321813" maxlength="10" />
+
+        <label>Candidate Tax ID <span class="hint">EIN for orgs · SSN/ITIN for individuals</span></label>
+        <input class="inp mono" id="tax" placeholder="77-8279821" />
+
+        <div class="samples" id="samples"></div>
+
+        <button class="btn" id="go">Verify</button>
+
+        <div class="assure"><b>Verify, don't disclose.</b> The candidate Tax ID is checked inside Oracle via a parameterized <span class="mono">EXISTS</span> on <span class="mono">(npi, tax_id)</span>. No stored Tax ID is ever returned, indexed, or logged — the response carries the boolean only.</div>
+      </div>
+    </section>
+
+    <!-- RIGHT: response -->
+    <section class="card">
+      <div class="card-h">
+        <h2>Verification Result</h2>
+        <div class="d">Boolean outcome with provider entity type and data currency.</div>
+      </div>
+      <div class="pad">
+        <div class="result" id="result">
+          <div class="placeholder">Submit a verification request to see the result.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FULL: wire format -->
+    <section class="card full">
+      <div class="seg" id="seg">
+        <button data-t="req" class="on">Request</button>
+        <button data-t="res">Response</button>
+        <button data-t="codes">Status Codes</button>
+      </div>
+      <div class="pad"><pre id="wire"></pre></div>
+    </section>
+  </main>
+
+<script>
+  // Mock "Oracle system of record" — never rendered to the user; only used for EXISTS check.
+  const SOR = {
+    "1043321813": {tax:"778279821", entityType:"2", asOf:"2026-06-22"}, // Organization
+    "1234567893": {tax:"942719831", entityType:"1", asOf:"2026-06-22"}, // Individual
+    "1567890234": {tax:"943380217", entityType:"1", asOf:"2026-06-20"},
+    "1093847562": {tax:"814456120", entityType:"2", asOf:"2026-06-22"},
+  };
+  const SAMPLES = [
+    {label:"Valid match", npi:"1043321813", tax:"77-8279821"},
+    {label:"Wrong Tax ID", npi:"1043321813", tax:"00-0000000"},
+    {label:"Unknown NPI",  npi:"9999999999", tax:"77-8279821"},
+  ];
+
+  const $ = s => document.querySelector(s);
+  const norm = s => (s||'').replace(/\D/g,'');
+  const entityLabel = e => e==="1" ? "Individual" : e==="2" ? "Organization" : "—";
+  let lastReq=null, lastRes=null, lastStatus="—";
+
+  function banner(cls, ic, tx, ds){ return `<div class="banner ${cls}"><div class="ic">${ic}</div><div><div class="tx">${tx}</div><div class="ds">${ds}</div></div></div>`; }
+  function kv(rows){ return `<div class="kv">${rows.map(r=>`<div><span class="k">${r[0]}</span><span class="v mono">${r[1]}</span></div>`).join('')}</div>`; }
+
+  function verify(){
+    const npi = norm($('#npi').value);
+    const taxRaw = $('#tax').value.trim();
+    const tax = norm(taxRaw);
+    lastReq = {npi: npi || "<empty>", candidateTaxId: taxRaw || "<empty>"};
+    const out = $('#result');
+
+    if(npi.length!==10){
+      lastStatus="400 Bad Request"; lastRes={error:"npi must be 10 digits"};
+      out.innerHTML = banner('warn','!','Invalid request','NPI must be exactly 10 digits.') ;
+      paintWire(); return;
+    }
+    const rec = SOR[npi];
+    if(!rec){
+      lastStatus="404 Not Found"; lastRes={npi, error:"unknown NPI"};
+      out.innerHTML = banner('warn','?','Unknown NPI','No provider with this NPI exists in the system of record.')
+        + kv([['HTTP status','404'],['npi',npi]]);
+      paintWire(); return;
+    }
+    const ok = tax.length===9 && tax===rec.tax;
+    lastStatus="200 OK";
+    lastRes = ok ? {npi, verified:true, entityType:rec.entityType, asOf:rec.asOf} : {npi, verified:false};
+
+    if(ok){
+      out.innerHTML = banner('ok','✓','Verified','The candidate Tax ID matches the system of record.')
+        + kv([['verified','true'],['entityType',`${rec.entityType} · ${entityLabel(rec.entityType)}`],['data as of',rec.asOf],['npi',npi]]);
+    } else {
+      out.innerHTML = banner('no','✕','Not verified','The candidate Tax ID does not match. No stored value is disclosed.')
+        + kv([['verified','false'],['npi',npi]]);
+    }
+    paintWire();
+  }
+
+  function paintWire(){
+    const t = $('#seg button.on').dataset.t;
+    const el = $('#wire');
+    if(t==="req"){
+      el.innerHTML =
+`<span class="cm"># Reaches the API only via CloudFront (secret origin header)</span>
+POST /api/verify
+<span class="ky">Host</span>: verify.nppes.cms.gov
+<span class="ky">x-api-key</span>: nr-uat-7f3c••••••••
+<span class="ky">Content-Type</span>: application/json
+
+${JSON.stringify(lastReq ?? {npi:"1043321813", candidateTaxId:"77-8279821"}, null, 2)}`;
+    } else if(t==="res"){
+      el.innerHTML =
+`<span class="st">${lastStatus}</span>
+${JSON.stringify(lastRes ?? {npi:"1043321813", verified:true, entityType:"2", asOf:"2026-06-22"}, null, 2)}`;
+    } else {
+      el.innerHTML =
+`<span class="st">200</span>  verified: true | false        <span class="cm"># boolean only — no PII</span>
+<span class="st">400</span>  npi must be 10 digits
+<span class="st">401/403</span>  missing or invalid API key
+<span class="st">404</span>  unknown NPI
+<span class="st">429</span>  throttled / quota exceeded     <span class="cm"># anti-enumeration control</span>`;
+    }
+  }
+
+  // wire up
+  $('#go').addEventListener('click', verify);
+  $('#npi').addEventListener('keydown', e=>{ if(e.key==='Enter') verify(); });
+  $('#tax').addEventListener('keydown', e=>{ if(e.key==='Enter') verify(); });
+  document.querySelectorAll('#seg button').forEach(b=> b.addEventListener('click', ()=>{
+    document.querySelectorAll('#seg button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); paintWire();
+  }));
+  $('#samples').innerHTML = SAMPLES.map((s,i)=>`<span class="samp" data-i="${i}">${s.label}</span>`).join('');
+  document.querySelectorAll('.samp').forEach(el=> el.addEventListener('click', ()=>{
+    const s = SAMPLES[el.dataset.i]; $('#npi').value=s.npi; $('#tax').value=s.tax;
+  }));
+  paintWire();
+</script>
+</body>
+</html>
